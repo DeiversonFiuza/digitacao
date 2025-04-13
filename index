@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Lição de Digitação</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background: #121212;
+            color: #fff;
+        }
+
+        #lesson-text {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #00c3ff;
+        }
+
+        .line-container {
+            font-size: 100px;
+            font-weight: bold;
+            background: #333;
+            padding: 30px;
+            border-radius: 10px;
+            display: inline-block;
+            color: #ffcc00;
+            margin-bottom: 20px;
+            width: 85%;
+            text-align: left;
+            white-space: nowrap;
+            letter-spacing: 10px;
+        }
+
+        #input-area {
+            font-size: 100px;
+            font-weight: bold;
+            background: #222;
+            padding: 30px;
+            border-radius: 10px;
+            color: #fff;
+            border: 4px solid #00c3ff;
+            margin-top: 20px;
+            width: 85%;
+            text-align: left;
+            white-space: nowrap;
+            letter-spacing: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .correct {
+            color: #8aff8a;
+        }
+
+        .incorrect {
+            color: #ff5555;
+        }
+
+        .current-char {
+            background-color: #00c3ff;
+            color: #121212;
+            border-radius: 10px;
+            padding: 5px 10px;
+        }
+
+        #result {
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 32px;
+            font-weight: bold;
+            background-color: #333;
+            border-radius: 15px;
+            display: inline-block;
+            border: 3px solid #00c3ff;
+        }
+
+        #retry-btn {
+            display: none;
+            margin-top: 30px;
+            padding: 15px 30px;
+            font-size: 28px;
+            background-color: #00c3ff;
+            color: #121212;
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        #retry-btn:hover {
+            background-color: #009dcf;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Lição de Digitação</h1>
+    <div id="lesson-text">Digite as sequências abaixo:</div>
+    <div id="lines"></div>
+    <input type="text" id="input-area" oninput="checkInput()" maxlength="25" autofocus autocomplete="off">
+
+    <div id="result"></div>
+    <div><button id="retry-btn" onclick="restartLesson()">Tentar Novamente</button></div>
+
+    <script>
+        const baseLine = "ASDF ASDF ASDF ASDF ASDF";
+        const lines = Array(5).fill(baseLine);
+        let currentLineIndex = 0;
+        let incorrectCharacterCount = 0;
+        let totalCorrectCharacterCount = 0;
+        let totalCharacterCount = 0;
+        let errorFlags = Array(baseLine.length).fill(false);
+
+        const inputArea = document.getElementById('input-area');
+        const linesContainer = document.getElementById('lines');
+        const resultElement = document.getElementById('result');
+        const retryButton = document.getElementById('retry-btn');
+
+        function displayCurrentLine() {
+            linesContainer.innerHTML = '';
+            let lineDiv = document.createElement("div");
+            lineDiv.classList.add("line-container");
+            lineDiv.innerHTML = lines[currentLineIndex];
+            linesContainer.appendChild(lineDiv);
+            errorFlags = Array(baseLine.length).fill(false);
+        }
+
+        function checkInput() {
+            let input = inputArea.value.toUpperCase();
+            let correctText = lines[currentLineIndex];
+            let styledText = '';
+            let correctInThisLine = 0;
+
+            for (let i = 0; i < correctText.length; i++) {
+                if (input[i] === correctText[i]) {
+                    styledText += `<span class='correct'>${correctText[i]}</span>`;
+                    correctInThisLine++;
+                } else if (input[i] && input[i] !== correctText[i]) {
+                    styledText += `<span class='incorrect'>${correctText[i]}</span>`;
+                    if (!errorFlags[i]) {
+                        incorrectCharacterCount++;
+                        errorFlags[i] = true;
+                    }
+                } else {
+                    if (i === input.length) {
+                        styledText += `<span class='current-char'>${correctText[i]}</span>`;
+                    } else {
+                        styledText += `<span>${correctText[i]}</span>`;
+                    }
+                }
+            }
+
+            linesContainer.children[0].innerHTML = styledText;
+
+            resultElement.innerHTML = `✅ Acertos: ${totalCorrectCharacterCount + correctInThisLine} | ❌ Erros: ${incorrectCharacterCount} | ✏️ Digitados: ${totalCharacterCount + input.length}`;
+
+            if (input.length === correctText.length) {
+                totalCorrectCharacterCount += correctInThisLine;
+                totalCharacterCount += input.length;
+                nextLine();
+            }
+        }
+
+        function nextLine() {
+            if (currentLineIndex < lines.length - 1) {
+                currentLineIndex++;
+                inputArea.value = "";
+                displayCurrentLine();
+            } else {
+                inputArea.disabled = true;
+                retryButton.style.display = "inline-block";
+            }
+        }
+
+        function restartLesson() {
+            location.reload();
+        }
+
+        displayCurrentLine();
+    </script>
+</body>
+
+</html>
